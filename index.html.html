@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JAMB CBT TEST SIMULATOR</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: "Segoe UI", sans-serif;
+      background: #f1f4f9;
+    }
+
+    .cbt-wrapper {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background: #fff;
+    }
+
+    header {
+      background: #004aad;
+      color: white;
+      padding: 20px;
+      font-size: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .timer {
+      font-size: 16px;
+      background: rgba(255,255,255,0.2);
+      padding: 8px 14px;
+      border-radius: 20px;
+    }
+
+    .question-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 30px;
+    }
+
+    .question-box {
+      max-width: 800px;
+      margin: 0 auto;
+      font-size: 18px;
+    }
+
+    .question-box h3 {
+      margin-bottom: 15px;
+    }
+
+    .options label {
+      display: block;
+      margin: 12px 0;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    input[type="radio"] {
+      margin-right: 10px;
+      transform: scale(1.2);
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 20px;
+      border-top: 1px solid #ccc;
+      flex-wrap: wrap;
+    }
+
+    .controls button {
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .prev-btn, .next-btn, .submit-btn {
+      background: none;
+      color: rgb(0, 0, 0);
+    }
+
+    .submit-btn:hover {
+      background: #ff0000;
+      color: #fff;
+    }
+
+    .submission-page {
+      display: none;
+      height: 100vh;
+      padding: 80px 20px;
+      box-sizing: border-box;
+    }
+
+    #scoreTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 30px;
+  font-size: 16px;
+}
+
+#scoreTable th, #scoreTable td {
+  border: 1px solid #ccc;
+  padding: 12px 18px;
+  text-align: center;
+}
+
+#scoreTable th {
+  background-color: #004aad;
+  color: white;
+}
+
+#scoreTable tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+#totalScoreDisplay {
+  margin-top: 20px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #004aad;
+}
+
+    .restart-btn {
+      background-color: #ffffff;
+      color: rgb(0, 0, 0);
+      padding: 12px 30px;
+      font-size: 16px;
+      border-radius: 30px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .restart-btn:hover {
+      background-color: #0056b3;
+      color: #fff;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .name-prompt {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: white;
+      text-align: center;
+    }
+
+    .name-prompt input {
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      width: 300px;
+      max-width: 90%;
+      margin-bottom: 20px;
+    }
+
+    .name-prompt button {
+      padding: 12px 30px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+    }
+
+    .name-prompt button:hover {
+      background-color: #0056b3;
+    }
+
+    .logo-top {
+      margin-bottom: 30px;
+    }
+
+    .subject-selection {
+  height: 100vh;
+  width: 100vw;
+  background: linear-gradient(to bottom right, #e0f2fe, #ffffff);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.subject-container {
+  background: #ffffff;
+  width: 100%;
+  max-width: 600px;
+  padding: 40px 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.subject-container h2 {
+  font-size: 24px;
+  color: #004aad;
+  margin-bottom: 30px;
+}
+
+.subject-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px 30px;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.subject-list label {
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.subject-list input[type="checkbox"] {
+  transform: scale(1.2);
+}
+
+.start-btn {
+  padding: 12px 30px;
+  font-size: 16px;
+  background-color: #007bff; /* Blue */
+  color: white;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 3px 6px rgba(0, 123, 255, 0.4);
+}
+
+.start-btn:hover {
+  background-color: #0056b3;
+}
+
+@media (max-width: 600px) {
+  .subject-list {
+    grid-template-columns: 1fr;
+  }
+
+  .subject-container {
+    padding: 30px 20px;
+  }
+}
+
+  </style>
+</head>
+
+
+<body>
+
+  <!-- LOGIN SCREEN -->
+  <div class="name-prompt" id="namePrompt">
+    <div class="logo-top">
+      <img src="Passport-Size-Photo-ClipArt-2nd-Png-Images-by-Varanasi-Best.png" alt="Logo" style="width: 100px; opacity: 0.7;" />
+    </div>
+    <h2>Enter Your Details to Start</h2>
+    <input type="text" id="candidateName" placeholder="Enter your name" />
+    <input type="password" id="candidatePass" placeholder="Enter passcode" />
+    <button onclick="goToSubjectSelection()">Start Quiz</button>
+    <p>
+      <button onclick="getPasscode()" style="background: none; border: none; color: #007bff; font-weight: bold; cursor: pointer;">Get Passcode Now</button>
+    </p>
+  </div>
+ <!-- ✅ Subject Selection Page -->
+<div class="subject-selection" id="subjectSelection" style="display: none;">
+  <div class="subject-container">
+    <h2>Select Subjects (English is Compulsory)</h2>
+    <form id="subjectForm">
+      <div class="subject-list">
+        <label><input type="checkbox" value="English" checked disabled> English (Compulsory)</label>
+        <label><input type="checkbox" name="subject" value="Mathematics"> Mathematics</label>
+        <label><input type="checkbox" name="subject" value="Physics"> Physics</label>
+        <label><input type="checkbox" name="subject" value="Chemistry"> Chemistry</label>
+        <label><input type="checkbox" name="subject" value="Biology"> Biology</label>
+      </div>
+      <button type="submit" class="start-btn">Start Exam</button>
+    </form>
+  </div>
+</div>
+
+
+  <!-- QUIZ INTERFACE -->
+  <div class="cbt-wrapper" id="quizPage" style="display: none;">
+    <header>
+      <span id="subjectHeader">Subject</span>
+      <span class="timer" id="timer">20:00</span>
+    </header>
+    <div class="question-area">
+      <div class="question-box" id="questionBox"></div>
+    </div>
+    <div class="controls">
+      <button class="prev-btn" onclick="prevQuestion()">Previous</button>
+      <button class="next-btn" onclick="nextQuestion()">Next</button>
+      <button class="submit-btn" onclick="submitSubject()">Submit Subject</button>
+    </div>
+  </div>
+  
+  <!-- FINAL RESULT -->
+  <div class="submission-page" id="submissionPage">
+    <div class="dashboard">
+      <h2>FINAL RESULT</h2>
+      <div class="candidate" id="displayName">Candidate: </div>
+      <table class="score-table" id="scoreTable">
+        <thead><tr><th>Subject</th><th>Raw Score</th><th>Score (/100)</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <h3 id="totalScoreDisplay"></h3>
+      <button class="restart-btn" onclick="restartQuiz()">Restart</button>
+
+    </div>
+  </div>
+  <!-- ✅ Submission Confirmation Popup -->
+<div id="confirmPopup" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; justify-content: center; align-items: center;">
+  <div style="background: white; padding: 30px 20px; border-radius: 12px; max-width: 90%; width: 300px; text-align: center;">
+    <p style="font-size: 18px; margin-bottom: 20px;">Are you sure you want to submit?</p>
+    <button onclick="confirmFinalSubmission(true)" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 6px; margin-right: 10px;">Yes</button>
+    <button onclick="confirmFinalSubmission(false)" style="background: #ccc; color: black; border: none; padding: 10px 20px; border-radius: 6px;">No</button>
+  </div>
+</div>
+
+  <script>
+  const allQuestions = {
+    English: [
+    {
+  question: "Choose the correct synonym of 'benevolent'.",
+  options: ["Cruel", "Kind", "Wicked", "Proud"],
+  answer: 1
+},
+{
+  question: "The antonym of 'abundant' is ______.",
+  options: ["Scarce", "Plenty", "Full", "Enough"],
+  answer: 0
+},
+{
+  question: "Choose the correctly punctuated sentence.",
+  options: [
+    "Yes I will go.",
+    "Yes, I will go.",
+    "Yes I, will go.",
+    "Yes, I, will go."
+  ],
+  answer: 1
+},
+{
+  question: "Identify the correct meaning of the idiom: 'spill the beans'.",
+  options: ["Waste food", "Reveal a secret", "Cook dinner", "Plant seeds"],
+  answer: 1
+},
+{
+  question: "Which word is stressed on the first syllable?",
+  options: ["Allow", "Present (noun)", "Begin", "Apply"],
+  answer: 1
+},
+{
+  question: "Fill in the blank: If he _____ earlier, he would have caught the bus.",
+  options: ["left", "had left", "leaves", "leaving"],
+  answer: 1
+},
+{
+  question: "Choose the word that has a different vowel sound.",
+  options: ["Beat", "Bit", "Seat", "Neat"],
+  answer: 1
+},
+{
+  question: "Choose the word that is nearest in meaning to 'deliberate'.",
+  options: ["Careless", "Intentional", "Sudden", "Unplanned"],
+  answer: 1
+},
+{
+  question: "What is the correct stress pattern for the word 'examination'?",
+  options: ["ex-A-mi-NA-tion", "EX-a-mi-na-tion", "ex-a-MI-na-tion", "ex-am-i-NA-tion"],
+  answer: 3
+},
+{
+  question: "Which of the following is a synonym for 'anxious'?",
+  options: ["Carefree", "Relaxed", "Worried", "Calm"],
+  answer: 2
+},
+{
+  question: "Which part of speech is the word 'quickly'?",
+  options: ["Adjective", "Noun", "Adverb", "Verb"],
+  answer: 2
+},
+{
+  question: "Select the word that is opposite in meaning to 'expand'.",
+  options: ["Extend", "Broaden", "Increase", "Contract"],
+  answer: 3
+},
+{
+  question: "Fill in the blank: Neither the students nor the teacher _____ in class.",
+  options: ["were", "are", "is", "be"],
+  answer: 2
+},
+{
+  question: "The word 'economical' means:",
+  options: ["Wasteful", "Careful with money", "Expensive", "Rich"],
+  answer: 1
+},
+{
+  question: "Choose the correct spelling.",
+  options: ["Receive", "Recieve", "Receeve", "Reseive"],
+  answer: 0
+},
+{
+  question: "Identify the odd word.",
+  options: ["Chair", "Table", "Spoon", "Couch"],
+  answer: 2
+},
+{
+  question: "The expression 'kick the bucket' means:",
+  options: ["Fall down", "Die", "Sleep", "Start running"],
+  answer: 1
+},
+{
+  question: "Choose the appropriate verb: He ____ to Lagos last week.",
+  options: ["goes", "gone", "went", "going"],
+  answer: 2
+},
+{
+  question: "Choose the antonym of 'transparent'.",
+  options: ["Clear", "Open", "Opaque", "Visible"],
+  answer: 2
+},
+{
+  question: "Which of these is a phrasal verb?",
+  options: ["Understand", "Put up with", "Know", "Enter"],
+  answer: 1
+},
+{
+  question: "Choose the word with a different stress pattern.",
+  options: ["Teacher", "Father", "Manage", "Arrange"],
+  answer: 3
+},
+{
+  question: "Select the correct sentence.",
+  options: ["He don't like rice.", "He doesn't likes rice.", "He doesn't like rice.", "He don't likes rice."],
+  answer: 2
+},
+{
+  question: "The plural form of 'crisis' is:",
+  options: ["Crisises", "Crisiseses", "Crises", "Crisis"],
+  answer: 2
+},
+{
+  question: "Choose the correct word: The book is divided _____ five sections.",
+  options: ["in", "into", "on", "among"],
+  answer: 1
+},
+{
+  question: "Which of these is a synonym of 'mandatory'?",
+  options: ["Optional", "Compulsory", "Random", "Doubtful"],
+  answer: 1
+},
+{
+  question: "Choose the correct expression: I succeeded _____ hard work.",
+  options: ["by", "through", "on", "with"],
+  answer: 1
+},
+{
+  question: "Select the word that rhymes with 'bright'.",
+  options: ["Write", "Beat", "Bit", "Heat"],
+  answer: 0
+},
+{
+  question: "What is the plural of 'datum'?",
+  options: ["Data", "Datums", "Datas", "Dates"],
+  answer: 0
+},
+{
+  question: "Identify the correct indirect speech: He said, 'I am tired.'",
+  options: [
+    "He said that I was tired.",
+    "He said he is tired.",
+    "He said he was tired.",
+    "He said he had been tired."
+  ],
+  answer: 2
+},
+{
+  question: "Choose the most appropriate question tag: She sings well, _____?",
+  options: ["does she", "doesn't she", "did she", "didn't she"],
+  answer: 1
+},
+{
+  question: "Choose the correct option: I prefer tea _____ coffee.",
+  options: ["to", "than", "over", "with"],
+  answer: 0
+},
+{
+  question: "Choose the correct sentence.",
+  options: ["He is a honest man.", "He is an honest man.", "He is honest man.", "He is the honest man."],
+  answer: 1
+},
+{
+  question: "Which of these words has the same vowel sound as 'seat'?",
+  options: ["Sit", "Bit", "Heat", "Met"],
+  answer: 2
+},
+{
+  question: "Identify the stressed syllable in 'Photography'.",
+  options: ["Pho-", "to-", "graph-", "phy"],
+  answer: 1
+},
+{
+  question: "Choose the word that best completes the sentence: They got there just _____ time.",
+  options: ["at", "in", "on", "with"],
+  answer: 1
+},
+{
+  question: "The word 'gregarious' means:",
+  options: ["Shy", "Sociable", "Greedy", "Hungry"],
+  answer: 1
+},
+{
+  question: "The judge ruled that the evidence was _____ to the case.",
+  options: ["irrelevant", "related", "important", "key"],
+  answer: 0
+},
+{
+  question: "Choose the word with the correct stress: 'Photograph'.",
+  options: ["PHO-to-graph", "pho-TO-graph", "pho-to-GRAPH", "pho-to-graph"],
+  answer: 0
+},
+{
+  question: "Which is correct?",
+  options: ["The news are good.", "The news is good.", "News are good.", "News is good."],
+  answer: 1
+},
+{
+  question: "Choose the correct preposition: He is interested _____ music.",
+  options: ["in", "on", "for", "to"],
+  answer: 0
+},
+{
+  question: "The word 'fragile' is opposite in meaning to:",
+  options: ["Soft", "Delicate", "Tough", "Tiny"],
+  answer: 2
+},
+{
+  question: "Which of the following contains an auxiliary verb?",
+  options: ["She dances", "They laughed", "I have gone", "We eat rice"],
+  answer: 2
+},
+{
+  question: "Choose the correct article: He bought _____ umbrella.",
+  options: ["a", "an", "the", "no article"],
+  answer: 1
+},
+{
+  question: "Fill in the gap: The room was too small for us to _____ in.",
+  options: ["live", "living", "lived", "have lived"],
+  answer: 0
+},
+{
+  question: "Which is a noun?",
+  options: ["Beautiful", "Quick", "Honesty", "Honestly"],
+  answer: 2
+},
+{
+  question: "Choose the right form: The boy was accused _____ stealing.",
+  options: ["of", "for", "with", "about"],
+  answer: 0
+},
+{
+  question: "The opposite of 'conclude' is:",
+  options: ["End", "Start", "Finish", "Summarize"],
+  answer: 1
+},
+{
+  question: "Identify the part of speech of 'running' in: 'Running is fun.'",
+  options: ["Verb", "Adverb", "Gerund", "Adjective"],
+  answer: 2
+},
+{
+  question: "Select the correct question tag: Let’s go for a walk, _____?",
+  options: ["shall we", "will you", "should we", "won’t we"],
+  answer: 0
+},
+{
+  question: "Which sentence is correct?",
+  options: ["He do his homework.", "He does his homework.", "He doing homework.", "He did do homework."],
+  answer: 1
+},
+
+{
+  question: "Who is the main protagonist in *The Lekki Headmaster*?",
+  options: ["The school principal", "The headmaster", "The teacher", "The student"],
+  answer: 1
+},
+{
+  question: "What challenges does the headmaster face in the story?",
+  options: ["Lack of students to teach", "Resistance from staff", "Overcrowded classrooms", "Financial crisis"],
+  answer: 1
+},
+{
+  question: "How does the headmaster manage to implement his reforms?",
+  options: ["By using forceful methods", "By working with the community", "By giving up after initial resistance", "By bribing the teachers"],
+  answer: 1
+},
+{
+  question: "What is a major theme in *The Lekki Headmaster*?",
+  options: ["Poverty and inequality", "Leadership and authority", "Love and friendship", "Environmental degradation"],
+  answer: 1
+},
+{
+  question: "How does the setting of the school influence the plot?",
+  options: [
+    "Rural village — hard to implement reforms",
+    "Located in Lekki — symbolizing tension between modernity and tradition",
+    "Irrelevant to the plot",
+    "In an abandoned building — limits success"
+  ],
+  answer: 1
+},
+{
+  question: "How is the principal’s leadership style characterized?",
+  options: ["Autocratic and strict", "Weak and indecisive", "Firm, fair, and reformative", "Indifferent and uninterested"],
+  answer: 2
+},
+{
+  question: "What role do the students play initially?",
+  options: ["Passive", "Resist reforms but later appreciate them", "Enthusiastic supporters", "Do not affect outcome"],
+  answer: 1
+},
+{
+  question: "What is the headmaster’s main goal?",
+  options: ["Make school best in region", "Increase enrollment", "Introduce modern technology", "Improve discipline and academic performance"],
+  answer: 3
+},
+{
+  question: "How does the headmaster deal with teacher resistance?",
+  options: ["Fires them", "Uses threats", "Listens to their concerns and changes approach", "Publicly punishes them"],
+  answer: 2
+},
+{
+  question: "What role does the community play in the novel?",
+  options: ["Indifferent", "Support headmaster’s reforms", "Oppose reforms", "Provide financial aid"],
+  answer: 1
+}
+
+    ],
+    Mathematics: [
+  {
+    question: "Differentiate y = 3x² + 2x - 5 with respect to x.",
+    options: ["3x + 2", "6x + 2", "3x² + 2x", "6x - 5"],
+    answer: 1
+  },
+  {
+    question: "Integrate ∫(2x + 3) dx.",
+    options: ["x² + 3x + C", "2x + 3x + C", "x² + 3 + C", "2x² + 3x + C"],
+    answer: 0
+  },
+  {
+    question: "How many different ways can the letters of the word 'MATHEMATICS' be arranged?",
+    options: ["39916800", "4989600", "1360800", "453600"],
+    answer: 2
+  },
+  {
+    question: "A committee of 3 is to be chosen from 5 boys and 4 girls. How many different combinations are possible?",
+    options: ["84", "56", "36", "126"],
+    answer: 0
+  },
+  {
+    question: "Solve: log₃(81).",
+    options: ["2", "3", "4", "5"],
+    answer: 2
+  },
+  {
+    question: "Find the value of sin 30° + cos 60°.",
+    options: ["0.5", "1", "√3/2", "2"],
+    answer: 1
+  },
+  {
+    question: "If y = 2x³ - 5x² + x - 7, find dy/dx.",
+    options: ["6x² - 10x + 1", "6x² + 5x + 1", "3x² - 5x + 1", "6x² + 10x - 1"],
+    answer: 0
+  },
+  {
+    question: "Evaluate ∫(x² - 4x + 3) dx.",
+    options: ["x³ - 2x² + 3x + C", "1/3x³ - 2x² + 3x + C", "x³ - 4x² + 3x + C", "1/3x³ - 4x² + 3x + C"],
+    answer: 1
+  },
+  {
+    question: "Differentiate y = sin x.",
+    options: ["cos x", "-cos x", "sin x", "-sin x"],
+    answer: 0
+  },
+  {
+    question: "Find the area under the curve y = 2x from x = 0 to x = 3.",
+    options: ["6", "9", "3", "12"],
+    answer: 1
+  },
+  {
+    question: "A pie chart shows that 90 students study Math out of 360. What angle represents Math?",
+    options: ["45°", "60°", "90°", "120°"],
+    answer: 1
+  },
+  {
+    question: "A circle has a radius of 7 cm. Find its area. (Use π = 22/7)",
+    options: ["154 cm²", "44 cm²", "49 cm²", "308 cm²"],
+    answer: 0
+  },
+  {
+    question: "Solve: x² - 8x + 15 = 0",
+    options: ["x = 3 or 5", "x = -3 or -5", "x = 2 or 7", "x = -2 or -7"],
+    answer: 0
+  },
+  {
+    question: "A triangle has sides 5 cm, 12 cm, and 13 cm. What type of triangle is it?",
+    options: ["Scalene", "Equilateral", "Isosceles", "Right-angled"],
+    answer: 3
+  },
+  {
+    question: "If sin x = 0.5, find x between 0° and 360°.",
+    options: ["30°, 150°", "45°, 135°", "60°, 120°", "90°, 270°"],
+    answer: 0
+  },
+  {
+    question: "If a box contains 3 red, 4 blue, and 5 green balls, what's the probability of picking a red?",
+    options: ["1/4", "3/12", "1/3", "1/5"],
+    answer: 0
+  },
+  {
+    question: "The mean of 3, 7, 9, x, 15 is 10. Find x.",
+    options: ["16", "18", "20", "25"],
+    answer: 0
+  },
+  {
+    question: "Find the median of 2, 4, 6, 8, 10, 12, 14.",
+    options: ["6", "8", "10", "7"],
+    answer: 1
+  },
+  {
+    question: "If the determinant of matrix A is zero, then A is:",
+    options: ["Singular", "Identity", "Inverse", "Diagonal"],
+    answer: 0
+  },
+  {
+    question: "The 5th term of an AP is 18 and the 10th term is 33. Find the common difference.",
+    options: ["2", "3", "4", "5"],
+    answer: 3
+  },
+  {
+    question: "Find the sum of the first 10 terms of the GP: 2, 4, 8, ...",
+    options: ["2046", "1024", "2048", "4094"],
+    answer: 0
+  },
+  {
+    question: "If x varies directly as y² and x = 18 when y = 3, find x when y = 6.",
+    options: ["36", "72", "54", "108"],
+    answer: 3
+  },
+  {
+    question: "Find the distance between the points A(2,3) and B(6,7).",
+    options: ["4", "6", "√32", "8"],
+    answer: 2
+  },
+  {
+    question: "Find the mode of 2, 4, 4, 6, 6, 6, 8, 10.",
+    options: ["4", "6", "8", "10"],
+    answer: 1
+  },
+  {
+    question: "Find the angle marked x in a triangle with angles 50° and 60°.",
+    options: ["70°", "60°", "50°", "80°"],
+    answer: 0
+  },
+  {
+    question: "If a = 2i + 3j and b = i - 2j, find a + b.",
+    options: ["3i + j", "i + j", "3i - j", "2i - j"],
+    answer: 0
+  },
+  {
+    question: "Find the equation of a line with slope 2 and passing through (1,3).",
+    options: ["y = 2x + 1", "y = 2x + 3", "y = 2x - 1", "y = x + 2"],
+    answer: 1
+  },
+  {
+    question: "Convert binary 1101 to decimal.",
+    options: ["11", "12", "13", "14"],
+    answer: 2
+  },
+  {
+    question: "Solve: ∫sin x dx",
+    options: ["-cos x + C", "cos x + C", "sin x + C", "-sin x + C"],
+    answer: 0
+  },
+  {
+    question: "Find the maximum value of the function y = -x² + 4x + 1.",
+    options: ["5", "4", "3", "6"],
+    answer: 3
+  },
+  {
+    question: "If f(x) = x² + 2x, find f(-3).",
+    options: ["3", "9", "-3", "15"],
+    answer: 2
+  },
+  {
+    question: "The graph of y = x² is a:",
+    options: ["Straight line", "Parabola", "Hyperbola", "Ellipse"],
+    answer: 1
+  },
+  {
+    question: "Find the value of 7C3.",
+    options: ["35", "21", "28", "14"],
+    answer: 0
+  },
+  {
+    question: "How many 3-digit numbers can be formed from 1, 2, 3, 4 without repetition?",
+    options: ["24", "12", "6", "60"],
+    answer: 0
+  },
+  {
+    question: "The angle of elevation of a tower is 30°, and the distance from the base is 100m. Find the height.",
+    options: ["50m", "57.7m", "70m", "100m"],
+    answer: 1
+  },
+  {
+    question: "Differentiate y = ln(x).",
+    options: ["1/x", "x", "ln(x)", "x²"],
+    answer: 0
+  },
+  {
+    question: "Find the 6th term of the sequence 3, 6, 12, ...",
+    options: ["96", "192", "99", "189"],
+    answer: 1
+  },
+  {
+    question: "A histogram is best used to represent:",
+    options: ["Continuous data", "Categorical data", "Discrete data", "Geometric data"],
+    answer: 0
+  },
+  {
+    question: "If A = [2 3; 4 5], find det(A).",
+    options: ["-2", "2", "10", "-10"],
+    answer: 1
+  }
+    ],
+
+    Physics: [
+  // 1
+  {
+    question: "A car accelerates uniformly from rest to 30 m/s in 10 seconds. Calculate its acceleration.",
+    options: ["3 m/s²", "2 m/s²", "1.5 m/s²", "4 m/s²"],
+    answer: 1
+  },
+  // 2
+  {
+    question: "What is the unit of electric charge?",
+    options: ["Volt", "Coulomb", "Ohm", "Watt"],
+    answer: 1
+  },
+  // 3
+  {
+    question: `Refer to the diagram below and answer the question:\n
+       |\\\n
+       | \\\n
+       |  \\\n
+       |___\\\n
+      A    B\n
+What type of force is acting along AB?`,
+    options: ["Tension", "Friction", "Normal force", "Gravitational force"],
+    answer: 0
+  },
+  // 4
+  {
+    question: "If the frequency of a wave is 50 Hz and its wavelength is 2 m, calculate its velocity.",
+    options: ["100 m/s", "25 m/s", "52 m/s", "48 m/s"],
+    answer: 0
+  },
+  // 5
+  {
+    question: "A body of mass 5 kg is moving with velocity 4 m/s. Calculate its kinetic energy.",
+    options: ["20 J", "40 J", "10 J", "80 J"],
+    answer: 1
+  },
+  // 6
+  {
+    question: "What is the acceleration due to gravity on Earth?",
+    options: ["9.8 m/s²", "10 m/s²", "9.2 m/s²", "8.9 m/s²"],
+    answer: 0
+  },
+  // 7
+  {
+    question: "What device is used to measure electric current?",
+    options: ["Voltmeter", "Ammeter", "Ohmmeter", "Galvanometer"],
+    answer: 1
+  },
+  // 8
+  {
+    question: "If a force of 10 N is applied to a mass of 2 kg, what is the acceleration produced?",
+    options: ["5 m/s²", "10 m/s²", "20 m/s²", "2 m/s²"],
+    answer: 0
+  },
+  // 9
+  {
+    question: "Which law states that the current flowing through a conductor is directly proportional to the potential difference across it?",
+    options: ["Ohm’s Law", "Newton’s First Law", "Boyle’s Law", "Faraday’s Law"],
+    answer: 0
+  },
+  // 10
+  {
+    question: "Calculate the power if 100 J of work is done in 5 seconds.",
+    options: ["20 W", "500 W", "50 W", "10 W"],
+    answer: 0
+  },
+  // 11
+  {
+    question: "Which of these materials is a good conductor of electricity?",
+    options: ["Copper", "Rubber", "Plastic", "Wood"],
+    answer: 0
+  },
+  // 12
+  {
+    question: "A light ray strikes a plane mirror at an angle of 30°. What is the angle of reflection?",
+    options: ["30°", "60°", "90°", "0°"],
+    answer: 0
+  },
+  // 13
+  {
+    question: "What is the formula for pressure?",
+    options: ["Force / Area", "Mass x Acceleration", "Energy / Time", "Velocity / Time"],
+    answer: 0
+  },
+  // 14
+  {
+    question: "Which phenomenon explains the bending of light when it passes from one medium to another?",
+    options: ["Reflection", "Refraction", "Diffraction", "Interference"],
+    answer: 1
+  },
+  // 15
+  {
+    question: "Calculate the density of a substance with mass 500 g and volume 250 cm³.",
+    options: ["2 g/cm³", "0.5 g/cm³", "4 g/cm³", "1 g/cm³"],
+    answer: 0
+  },
+  // 16
+  {
+    question: "A pendulum completes 20 oscillations in 40 seconds. Calculate its frequency.",
+    options: ["0.5 Hz", "2 Hz", "20 Hz", "40 Hz"],
+    answer: 0
+  },
+  // 17
+  {
+    question: "What type of energy is stored in a stretched spring?",
+    options: ["Kinetic energy", "Potential energy", "Thermal energy", "Chemical energy"],
+    answer: 1
+  },
+  // 18
+  {
+    question: "If an object is moving in a circle at constant speed, what kind of acceleration does it have?",
+    options: ["Linear acceleration", "Centripetal acceleration", "Tangential acceleration", "No acceleration"],
+    answer: 1
+  },
+  // 19
+  {
+    question: "The resistance of a wire depends on which factor?",
+    options: ["Length of wire", "Thickness of wire", "Temperature", "All of the above"],
+    answer: 3
+  },
+  // 20
+  {
+    question: "A wave has a period of 0.02 seconds. Calculate its frequency.",
+    options: ["50 Hz", "20 Hz", "0.02 Hz", "200 Hz"],
+    answer: 0
+  },
+  // 21
+  {
+    question: "Which instrument is used to measure temperature?",
+    options: ["Thermometer", "Barometer", "Hygrometer", "Anemometer"],
+    answer: 0
+  },
+  // 22
+  {
+    question: "If 10 J of work is done in 2 seconds, what is the power output?",
+    options: ["5 W", "20 W", "12 W", "8 W"],
+    answer: 0
+  },
+  // 23
+  {
+    question: "What is the unit of pressure in the SI system?",
+    options: ["Pascal", "Newton", "Joule", "Watt"],
+    answer: 0
+  },
+  // 24
+  {
+    question: "Which type of mirror is used to focus sunlight to a point?",
+    options: ["Plane mirror", "Concave mirror", "Convex mirror", "None"],
+    answer: 1
+  },
+  // 25
+  {
+    question: "If a current of 2 A flows through a wire for 3 seconds, calculate the charge passed.",
+    options: ["6 C", "5 C", "3 C", "1.5 C"],
+    answer: 0
+  },
+  // 26
+  {
+    question: "What is the work done in lifting a 10 kg object to a height of 5 m? (g = 10 m/s²)",
+    options: ["50 J", "500 J", "100 J", "5 J"],
+    answer: 1
+  },
+  // 27
+  {
+    question: "A coil rotates in a magnetic field producing an induced emf. This is an example of which law?",
+    options: ["Faraday's Law", "Ohm's Law", "Newton’s Law", "Archimedes Principle"],
+    answer: 0
+  },
+  // 28
+  {
+    question: "The refractive index of a medium is defined as the ratio of:",
+    options: ["Speed of light in vacuum to speed in medium", "Speed of light in medium to speed in vacuum", "Wavelength in medium to wavelength in vacuum", "Frequency in medium to frequency in vacuum"],
+    answer: 0
+  },
+  // 29
+  {
+    question: `Look at the circuit diagram below:\n
+     _________\n
+    |         |\n
+    |    R    |\n
+    |_________|\n
+What does 'R' represent in the circuit?`,
+    options: ["Battery", "Resistor", "Switch", "Voltmeter"],
+    answer: 1
+  },
+  // 30
+  {
+    question: "What is the SI unit of capacitance?",
+    options: ["Farad", "Henry", "Ohm", "Tesla"],
+    answer: 0
+  },
+  // 31
+  {
+    question: "A projectile is launched vertically upward with speed 20 m/s. Calculate the maximum height reached.",
+    options: ["20 m", "40 m", "10 m", "30 m"],
+    answer: 1
+  },
+  // 32
+  {
+    question: "Which quantity is a vector?",
+    options: ["Speed", "Distance", "Displacement", "Time"],
+    answer: 2
+  },
+  // 33
+  {
+    question: "The temperature at which a substance changes from solid to liquid is called:",
+    options: ["Boiling point", "Freezing point", "Melting point", "Condensation point"],
+    answer: 2
+  },
+  // 34
+  {
+    question: "In a series circuit, the total resistance is:",
+    options: ["Sum of individual resistances", "Less than the smallest resistance", "Equal to the largest resistance", "None of these"],
+    answer: 0
+  },
+  // 35
+  {
+    question: "If the wavelength of light is 600 nm, what is its frequency? (Speed of light = 3 × 10⁸ m/s)",
+    options: ["5 × 10¹⁴ Hz", "2 × 10¹⁴ Hz", "6 × 10¹⁴ Hz", "3 × 10¹⁴ Hz"],
+    answer: 0
+  },
+  // 36
+  {
+    question: "A gas expands from 1 m³ to 3 m³ at constant temperature. According to Boyle's Law, what happens to the pressure?",
+    options: ["It triples", "It reduces to one-third", "It remains constant", "It doubles"],
+    answer: 1
+  },
+  // 37
+  {
+    question: "A transformer steps up voltage from 220 V to 4400 V. What type of transformer is this?",
+    options: ["Step-down transformer", "Step-up transformer", "Isolation transformer", "None of these"],
+    answer: 1
+  },
+  // 38
+  {
+    question: "The resistance of a wire is 10 Ω. If its length is doubled and the diameter is halved, what happens to the resistance?",
+    options: ["Doubles", "Quadruples", "Increases by 8 times", "Halves"],
+    answer: 2
+  },
+  // 39
+  {
+    question: "A concave lens always produces an image that is:",
+    options: ["Real and inverted", "Virtual and erect", "Real and erect", "No image"],
+    answer: 1
+  },
+  // 40
+  {
+    question: `Look at the diagram of the prism below and answer:\n
+    /\\\n
+   /  \\\n
+  /____\\\n
+What is the angle between the two refracting surfaces?`,
+    options: ["30°", "60°", "45°", "90°"],
+    answer: 1
+  }
+    ],
+    Chemistry: [
+  {
+    question: "What is the atomic number of chlorine?",
+    options: ["17", "35", "53", "18"],
+    answer: 0
+  },
+  {
+    question: "Which gas is produced when dilute hydrochloric acid reacts with zinc?",
+    options: ["Oxygen", "Hydrogen", "Chlorine", "Carbon dioxide"],
+    answer: 1
+  },
+  {
+    question: "What is the molecular formula of ethanoic acid?",
+    options: ["C2H4O2", "CH3COOH", "C2H6O", "C2H2O2"],
+    answer: 1
+  },
+  {
+    question: "Which compound is ionic?",
+    options: ["H2O", "NaCl", "CH4", "CO2"],
+    answer: 1
+  },
+  {
+    question: "What volume of oxygen (at STP) is needed to completely burn 3 dm³ of propane?",
+    options: ["15 dm³", "10 dm³", "5 dm³", "20 dm³"],
+    answer: 0
+  },
+  {
+    question: "Which of these elements is a halogen?",
+    options: ["Chlorine", "Oxygen", "Nitrogen", "Carbon"],
+    answer: 0
+  },
+  {
+    question: "What is the pH of pure water?",
+    options: ["0", "7", "14", "1"],
+    answer: 1
+  },
+  {
+    question: "Which of these gases causes acid rain?",
+    options: ["CO2", "SO2", "O2", "N2"],
+    answer: 1
+  },
+  {
+    question: "What type of bond is present in chlorine gas (Cl2)?",
+    options: ["Ionic", "Covalent", "Metallic", "Hydrogen"],
+    answer: 1
+  },
+  {
+    question: "What is the oxidation number of oxygen in H2O2?",
+    options: ["-1", "-2", "0", "+1"],
+    answer: 0
+  },
+  {
+    question: "Which element is a transition metal?",
+    options: ["Calcium", "Iron", "Potassium", "Sodium"],
+    answer: 1
+  },
+  {
+    question: "What is the empirical formula of glucose (C6H12O6)?",
+    options: ["CH2O", "C2H4O2", "C6H12O6", "CH4O"],
+    answer: 0
+  },
+  {
+    question: "Which reagent is used to test for unsaturation in hydrocarbons?",
+    options: ["Bromine water", "Sodium hydroxide", "Dilute acid", "Potassium permanganate"],
+    answer: 0
+  },
+  {
+    question: "What is the molar mass of calcium carbonate (CaCO3)?",
+    options: ["100 g/mol", "120 g/mol", "80 g/mol", "50 g/mol"],
+    answer: 0
+  },
+  {
+    question: "Which gas is liberated when dilute sulfuric acid reacts with zinc?",
+    options: ["Hydrogen", "Oxygen", "Sulfur dioxide", "Carbon dioxide"],
+    answer: 0
+  },
+  {
+    question: "What is the product when ethene reacts with bromine?",
+    options: ["1,2-Dibromoethane", "Bromoethene", "Ethane", "Ethyne"],
+    answer: 0
+  },
+  {
+    question: "Which of these shows chain isomerism?",
+    options: ["Butane and isobutane", "Butanol and butanone", "Cis and trans-butene", "Ethanol and dimethyl ether"],
+    answer: 0
+  },
+  {
+    question: "What is the electronic configuration of sodium (Na)?",
+    options: ["1s2 2s2 2p6 3s1", "1s2 2s2 2p6 3p1", "1s2 2s2 2p5", "1s2 2s2 2p6"],
+    answer: 0
+  },
+  {
+    question: "Which group in the periodic table contains the alkali metals?",
+    options: ["Group 1", "Group 2", "Group 17", "Group 18"],
+    answer: 0
+  },
+  {
+    question: "What volume of hydrogen gas is produced when 2 moles of zinc react with excess acid?",
+    options: ["44.8 dm³", "22.4 dm³", "11.2 dm³", "33.6 dm³"],
+    answer: 0
+  },
+  {
+    question: "Which acid is commonly found in lemon juice?",
+    options: ["Sulfuric acid", "Citric acid", "Acetic acid", "Hydrochloric acid"],
+    answer: 1
+  },
+  {
+    question: "What is the correct formula for ammonia?",
+    options: ["NH4", "NH3", "N2H4", "NO3"],
+    answer: 1
+  },
+  {
+    question: "Which of these is a noble gas?",
+    options: ["Neon", "Nitrogen", "Oxygen", "Hydrogen"],
+    answer: 0
+  },
+  {
+    question: "Which of these metals is most reactive?",
+    options: ["Copper", "Potassium", "Gold", "Silver"],
+    answer: 1
+  },
+  {
+    question: "What type of reaction is represented by: A + B → AB?",
+    options: ["Decomposition", "Combination", "Displacement", "Neutralisation"],
+    answer: 1
+  },
+  {
+    question: "Which gas is responsible for global warming?",
+    options: ["Nitrogen", "Carbon dioxide", "Oxygen", "Hydrogen"],
+    answer: 1
+  },
+  {
+    question: "What is the oxidation state of sulfur in H2SO4?",
+    options: ["+4", "+6", "-2", "0"],
+    answer: 1
+  },
+  {
+    question: "Which of these shows geometrical isomerism?",
+    options: ["Cis and trans-butene", "Butane and isobutane", "Ethanol and dimethyl ether", "Butanol and butanone"],
+    answer: 0
+  },
+  {
+    question: "Which element has the highest electronegativity?",
+    options: ["Fluorine", "Oxygen", "Chlorine", "Nitrogen"],
+    answer: 0
+  },
+  {
+    question: "What volume of 0.5M H2SO4 is needed to react completely with 0.25 moles of NaOH?",
+    options: ["0.25 dm³", "0.5 dm³", "1 dm³", "0.125 dm³"],
+    answer: 3
+  },
+  {
+    question: "Which process involves the loss of electrons?",
+    options: ["Oxidation", "Reduction", "Neutralisation", "Precipitation"],
+    answer: 0
+  },
+  {
+    question: "Which of these is a physical change?",
+    options: ["Rusting of iron", "Burning of wood", "Melting of ice", "Baking a cake"],
+    answer: 2
+  },
+  {
+    question: "Which of the following has the highest melting point?",
+    options: ["Ionic compound", "Covalent compound", "Metallic compound", "Molecular compound"],
+    answer: 0
+  },
+  {
+    question: "Which is the formula of sulfuric acid?",
+    options: ["H2SO4", "H2S", "SO2", "HSO4"],
+    answer: 0
+  },
+  {
+    question: "Which reagent is used to test for the presence of carbonates?",
+    options: ["Dilute acid", "Bromine water", "Sodium hydroxide", "Potassium permanganate"],
+    answer: 0
+  },
+  {
+    question: "What is the mass number of an atom with 17 protons and 18 neutrons?",
+    options: ["35", "17", "18", "53"],
+    answer: 0
+  },
+  {
+    question: "Which of these elements is a metalloid?",
+    options: ["Silicon", "Sodium", "Sulfur", "Calcium"],
+    answer: 0
+  },
+  {
+    question: "What is the name of the compound NaOH?",
+    options: ["Sodium hydroxide", "Sodium oxide", "Sodium hydride", "Sodium peroxide"],
+    answer: 0
+  },
+  {
+    question: "What is the process of a solid turning directly to gas called?",
+    options: ["Sublimation", "Condensation", "Evaporation", "Melting"],
+    answer: 0
+  },
+  {
+  question: `Study the structure below and answer the question:\n
+H    H
+ \\  /
+  C = C
+ /    \\
+H      Br
+`,
+  options: [
+    "Chain isomerism",
+    "Position isomerism",
+    "Geometrical isomerism",
+    "Functional group isomerism"
+  ],
+  answer: 2
+}
+
+    ],
+    Biology: [
+      { question: "NUll", options: ["A", "B", "C", "D"], answer: 2 },
+      { question: "Null", options: ["A", "B", "C", "D"], answer: 1 }
+    ],
+
+  };
+  let userName = "", selectedSubjects = [], currentSubjectIndex = 0;
+  let questions = [], selectedAnswers = [], scores = {};
+  let currentQuestion = 0, timerInterval, timeLeft = 20 * 60;
+
+  function getPasscode() {
+    window.location.href = "https://wa.me/8166251783";
+  }
+
+  function goToSubjectSelection() {
+    const name = document.getElementById("candidateName").value.trim();
+    const pass = document.getElementById("candidatePass").value.trim();
+    if (!name || !pass) return alert("Enter Name and Passcode");
+    if (pass !== "1970") if (pass !== "2020") if (pass !== "195") if (pass !== "251") if (pass !== "287")
+    if (pass !== "asuquo") return alert("Invalid passcode");
+    userName = name;
+    document.getElementById("namePrompt").style.display = "none";
+    document.getElementById("subjectSelection").style.display = "flex";
+  }
+
+  document.getElementById("subjectForm").onsubmit = function(e) {
+    e.preventDefault();
+
+    const selected = [...document.querySelectorAll("input[name='subject']:checked")].map(i => i.value);
+
+    if (selected.length !== 3) {
+      alert("Please select exactly 3 more subjects. English is already selected.");
+      return;
+    }
+
+    selectedSubjects = ["English", ...selected];
+    currentSubjectIndex = 0;
+    scores = {};
+    startSubject();
+  };
+
+  function startSubject() {
+    const subject = selectedSubjects[currentSubjectIndex];
+    questions = shuffle([...allQuestions[subject]]);
+    questions.forEach(q => {
+      q.shuffledOptions = shuffle(q.options.map((opt, i) => ({ text: opt, originalIndex: i })));
+    });
+    selectedAnswers = Array(questions.length).fill(null);
+    currentQuestion = 0;
+    document.getElementById("subjectHeader").innerText = `${subject} CBT`;
+    loadQuestion();
+    document.getElementById("subjectSelection").style.display = "none";
+    document.getElementById("submissionPage").style.display = "none";
+    document.getElementById("quizPage").style.display = "flex";
+    startTimer();
+  }
+
+  function loadQuestion() {
+    const q = questions[currentQuestion];
+    let html = `<h3>Question ${currentQuestion + 1} of ${questions.length}</h3>`;
+    html += `<p>${q.question}</p><div class="options">`;
+    q.shuffledOptions.forEach((opt, i) => {
+      const checked = selectedAnswers[currentQuestion] === i ? "checked" : "";
+      html += `<label><input type="radio" name="option" value="${i}" ${checked} onclick="selectOption(${i})"> ${opt.text}</label>`;
+    });
+    html += "</div>";
+    document.getElementById("questionBox").innerHTML = html;
+  }
+
+  function selectOption(i) {
+    selectedAnswers[currentQuestion] = i;
+  }
+
+  function nextQuestion() {
+    if (currentQuestion < questions.length - 1) {
+      currentQuestion++;
+      loadQuestion();
+    }
+  }
+
+  function prevQuestion() {
+    if (currentQuestion > 0) {
+      currentQuestion--;
+      loadQuestion();
+    }
+  }
+
+  function submitSubject() {
+    let score = 0;
+    questions.forEach((q, i) => {
+      const selected = selectedAnswers[i];
+      const chosen = q.shuffledOptions[selected];
+      if (chosen && chosen.originalIndex === q.answer) score++;
+    });
+
+    const subject = selectedSubjects[currentSubjectIndex];
+    const total = questions.length;
+    const percent = ((score / total) * 100).toFixed(1);
+    scores[subject] = { score, total, percent };
+
+    clearInterval(timerInterval);
+
+    currentSubjectIndex++;
+    if (currentSubjectIndex < selectedSubjects.length) {
+  startSubject();
+} else {
+  // Show confirmation popup
+  document.getElementById("confirmPopup").style.display = "flex";
+}
+
+  }
+
+  function confirmFinalSubmission(confirm) {
+  document.getElementById("confirmPopup").style.display = "none";
+  if (confirm) {
+    showFinalResult();
+  }
+}
+
+
+  function showFinalResult() {
+    document.getElementById("quizPage").style.display = "none";
+    document.getElementById("submissionPage").style.display = "block";
+    document.getElementById("displayName").innerText = `Candidate: ${userName}`;
+    const tbody = document.querySelector("#scoreTable tbody");
+    tbody.innerHTML = "";
+    let total = 0;
+    selectedSubjects.forEach(subject => {
+      const s = scores[subject];
+      const raw = `${s.score}/${s.total}`;
+      const converted = ((s.score / s.total) * 100).toFixed(1);
+      total += parseFloat(converted);
+      tbody.innerHTML += `<tr><td>${subject}</td><td>${raw}</td><td>${converted}</td></tr>`;
+    });
+    document.getElementById("totalScoreDisplay").innerText = `Total Score: ${total.toFixed(1)} / 400`;
+  }
+
+  function restartQuiz() {
+  document.getElementById("submissionPage").style.display = "none"; // Hide result
+  document.getElementById("quizPage").style.display = "none";       // Hide quiz
+  document.getElementById("namePrompt").style.display = "none";     // Keep login hidden
+  document.getElementById("subjectSelection").style.display = "flex"; // Show subject selection
+
+  // Reset checkboxes: keep English checked, others unchecked
+  document.querySelectorAll("input[name='subject']").forEach(cb => cb.checked = false);
+  const englishCheckbox = document.querySelector("input[value='English']");
+  if (englishCheckbox) englishCheckbox.checked = true;
+
+  // Optional: Restore user name in case they go back to login later
+  const nameInput = document.getElementById("candidateName");
+  if (nameInput) nameInput.value = userName || "";
+}
+
+  function shuffle(arr) {
+    return arr.sort(() => Math.random() - 0.5);
+  }
+
+  function startTimer() {
+    timeLeft = 20 * 60;
+    const timerDisplay = document.getElementById("timer");
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        alert("Time is up! Submitting this subject.");
+        submitSubject();
+      } else {
+        let m = Math.floor(timeLeft / 60);
+        let s = (timeLeft % 60).toString().padStart(2, "0");
+        timerDisplay.textContent = `${m}:${s}`;
+        timeLeft--;
+      }
+    }, 1000);
+  }
+</script>
+
+  </body>
+  </html>
+  
